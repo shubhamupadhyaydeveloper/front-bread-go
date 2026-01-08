@@ -80,7 +80,7 @@ const OtpVerification: React.FC = () => {
         setError('');
 
         try {
-            mutateAsync({ email, otp: otpString });
+            await mutateAsync({ email, otp: otpString });
         } catch (err: any) {
             setError(err.message || 'Invalid OTP. Please try again.');
         } finally {
@@ -119,9 +119,9 @@ const OtpVerification: React.FC = () => {
                     <p className="text-[var(--text-secondary)] text-sm">
                         We've sent a 6-digit code to
                     </p>
-                    <p className="text-[var(--primary-color)] text-sm font-medium mt-1">
+                    {/* <p className="text-[var(--primary-color)] text-sm font-medium mt-1">
                         {email}
-                    </p>
+                    </p> */}
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">

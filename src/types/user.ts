@@ -2,6 +2,16 @@
 export interface userInfo {
     email: string;
     username: string;
-    user_id: number;
+    bio : string;
+    id: number;
     created_at: string;
 }
+
+export interface userInfoRequest {
+    data : {
+        user : userInfo,
+        followers : number,
+        following : number,
+    }
+}
+

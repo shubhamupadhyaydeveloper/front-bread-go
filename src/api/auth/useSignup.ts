@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import apiClient from "../apiClient";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface SignupCredentials {
     email: string;
@@ -31,6 +32,7 @@ export const useSignup = () => {
         },
         onSuccess: (_,variables) => {
             // Navigate to home or dashboard
+            toast.success("Otp sent on email")
             navigate("/verify-otp", {
                 state: {
                     email: variables.email,
@@ -39,7 +41,7 @@ export const useSignup = () => {
         },
         onError: (error: any) => {
             console.error("Signup failed:", error);
-            // You can add toast notifications here
+            toast.error("Signup failed")
         },
     });
 };

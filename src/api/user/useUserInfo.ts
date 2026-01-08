@@ -1,18 +1,23 @@
-import { useQuery } from "@tanstack/react-query"
-import apiClient from "../apiClient";
 import { useAuthStore } from "../../store/authStore";
+import { userInfo } from "../../types/user";
 
-export const useUserInfo = () => {
-    const { userInfo } = useAuthStore()
-    console.log("userInfo information", userInfo)
-    return useQuery({
-        queryKey: ["userInfo"],
-        queryFn: async () => {
-            const response = await apiClient.get("/users/" + userInfo?.user_id);
-            return response.data;
-        },
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        refetchOnWindowFocus: false,
-    })
+/**
+ * Hook to get the current logged-in user's info from Zustand store
+ * This returns the userInfo that was set during login
+ * For fetching a specific user's profile, use useGetUserProfile instead
+ */
+export const useUserInfo = (): {
+    user: userInfo | null,
+    followers: number,
+    following: number,
+    isLoading: boolean
+} => {
+    const { userInfo, loading } = useAuthStore()
+
+    return {
+        user: userInfo,
+        followers: 0, // These would need to be stored in Zustand if needed
+        following: 0, // Or fetched separately
+        isLoading: loading
+    };
 }
-

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Repeat, Share2, MoreHorizontal } from 'lucide-react';
-import { DUMMY_POSTS } from '../utils/dummyData';
+import { useGetPostById } from '../api/post/useGetPostById';
 
 interface User {
     name: string;
@@ -9,16 +9,6 @@ interface User {
     avatar: string;
 }
 
-interface Post {
-    id: number;
-    user: User;
-    content: string;
-    image?: string | null;
-    likes: number;
-    replies: number;
-    timestamp: string;
-    liked: boolean;
-}
 
 interface Comment {
     id: number;
@@ -31,7 +21,7 @@ interface Comment {
 const PostDetails: React.FC = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const [post, setPost] = useState<Post | null>(null);
+    const { data: postDetails } = useGetPostById(id || '');
     const [comments] = useState<Comment[]>([
         {
             id: 101,
@@ -68,14 +58,7 @@ const PostDetails: React.FC = () => {
         }
     ]);
 
-    useEffect(() => {
-        // Find post from dummy data based on ID
-        const foundPost = DUMMY_POSTS.find(p => p.id === Number(id));
-        setPost(foundPost || null);
-        window.scrollTo(0, 0);
-    }, [id]);
-
-    if (!post) {
+    if (!postDetails) {
         return (
             <div className="w-full max-w-[600px] mx-auto pb-20 min-h-screen bg-[var(--bg-color)] border-x border-[var(--border-color)]">
                 <header className="sticky top-0 z-50 backdrop-blur-xl bg-black/70 border-b border-[var(--border-color)] px-4 h-[60px] flex items-center gap-5">
@@ -105,6 +88,7 @@ const PostDetails: React.FC = () => {
                 <h1 className="text-xl font-bold m-0">Thread</h1>
             </header>
 
+
             <main>
                 {/* Main Post */}
                 <article className="border-b border-[var(--border-color)] p-4">
@@ -112,18 +96,18 @@ const PostDetails: React.FC = () => {
                     <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-3">
                             <img
-                                src={post.user.avatar}
-                                alt={post.user.username}
+                                src={`https://avatar.iran.liara.run/public?username=${postDetails?.data?.user?.username}`}
+                                alt={postDetails?.data?.user?.username}
                                 className="w-10 h-10 rounded-full object-cover"
                             />
                             <div className="flex flex-col">
                                 <span className="text-[var(--text-main)] font-semibold text-base">
-                                    {post.user.username}
+                                    {postDetails?.data?.user?.username}
                                 </span>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-                            <span className="text-sm">{post.timestamp}</span>
+                            <span className="text-sm">{postDetails?.data?.created_at}</span>
                             <button className="p-1 hover:bg-white/10 rounded-full transition-colors">
                                 <MoreHorizontal size={20} />
                             </button>
@@ -132,22 +116,22 @@ const PostDetails: React.FC = () => {
 
                     {/* Post Content */}
                     <div className="mt-3 text-[var(--text-main)] text-lg leading-relaxed">
-                        {post.content}
+                        {postDetails?.data?.content}
                     </div>
 
                     {/* Post Image */}
-                    {post.image && (
+                    {postDetails?.data?.image_url && (
                         <img
-                            src={post.image}
+                            src={postDetails?.data?.image_url}
                             alt="Post content"
                             className="mt-3 w-full rounded-2xl object-cover max-h-[500px]"
                         />
                     )}
 
                     {/* Post Stats */}
-                    <div className="py-4 border-b border-[var(--border-color)] text-[var(--text-secondary)] text-sm">
+                    {/* <div className="py-4 border-b border-[var(--border-color)] text-[var(--text-secondary)] text-sm">
                         <span>{post.likes} likes</span> • <span>{post.replies} replies</span>
-                    </div>
+                    </div> */}
 
                     {/* Post Actions */}
                     <div className="flex justify-between items-center py-3">

@@ -3,6 +3,7 @@ import apiClient from "../apiClient";
 import { useAuthStore } from "../../store/authStore";
 import { useNavigate } from "react-router-dom";
 import { userInfo } from "../../types/user";
+import { toast } from "sonner";
 
 interface LoginCredentials {
     email: string;
@@ -35,12 +36,13 @@ export const useLogin = (): UseMutationResult<LoginResponse, any, LoginCredentia
             setAccessToken(data.data.accessToken);
             setUserInfo(data.data.user_info);
             setIsAuthenticated(true);
+            toast.success("Login succesful")
             // Navigate to home or dashboard
             navigate("/");
         },
         onError: (error: any) => {
             console.error("Login failed:", error);
-            // You can add toast notifications here
+            toast.error("Invalid email or password")
         },
     });
 };

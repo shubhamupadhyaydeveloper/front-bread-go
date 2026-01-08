@@ -1,36 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, Trash2, Share2 } from 'lucide-react';
-import { Post as PostType } from '../utils/dummyData';
-import { FeedResponse } from '../types/feed';
-import { useUserInfo } from '../api/user/useUserInfo';
-import { useDeletePost } from '../api/post/useDeletePost';
+import { PostResponse } from '../types/post';
+import { userInfo } from '../types/user';
 
 interface PostProps {
-    postInfo: FeedResponse;
+    post: { data: PostResponse };
+    userInfo: userInfo,
     onDelete?: (id: number) => void;
-    onClick?: (post: PostType) => void;
+    onClick?: (post: PostResponse) => void;
+    showBorderLine: boolean
 }
 
-const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
-    // const [liked, setLiked] = useState(post.liked);
-    // const [likesCount, setLikesCount] = useState(post.likes);
+const UserPost: React.FC<PostProps> = ({ post, userInfo, onDelete, onClick, showBorderLine }) => {
+    // const [liked, setLiked] = useState(post.comments.length > 0);
+    // const [likesCount, setLikesCount] = useState(post.comments.length);
     const [showMenu, setShowMenu] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [commentText, setCommentText] = useState('');
     const menuRef = useRef<HTMLDivElement>(null);
-    const { user: userInfo } = useUserInfo();
-    const { mutateAsync: deletePost } = useDeletePost();
+    // const {}
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setShowMenu(false);
-            }
-        };
-        // console.log("post",post)
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     // const handleLike = (e: React.MouseEvent) => {
     //     e.stopPropagation();
@@ -42,18 +31,18 @@ const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
     //     setLiked(!liked);
     // };
 
-    // const handleDelete = () => {
-    //     if (window.confirm('Are you sure you want to delete this post?')) {
-    //         onDelete?.(post.id);
-    //     }
-    //     setShowMenu(false);
-    // };
+    const handleDelete = () => {
+        if (window.confirm('Are you sure you want to delete this post?')) {
+            onDelete?.(post.data.id);
+        }
+        setShowMenu(false);
+    };
 
-    // const handleShare = () => {
-    //     navigator.clipboard.writeText(`Check out this post by @${post.user.username}`);
-    //     alert('Link copied to clipboard!');
-    //     setShowMenu(false);
-    // };
+    const handleShare = () => {
+        navigator.clipboard.writeText(`Check out this post by @${userInfo.username}`);
+        alert('Link copied to clipboard!');
+        setShowMenu(false);
+    };
 
     const handleComment = () => {
         if (commentText.trim()) {
@@ -63,22 +52,16 @@ const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
         }
     };
 
-    const isOwner = postInfo?.post?.user?.id === userInfo?.id;
-    const [isFollowing, setIsFollowing] = useState(postInfo?.is_following);
+    const isOwner = true
+    const [isFollowing, setIsFollowing] = useState(false);
 
-    useEffect(() => {
-        console.log('postUser', postInfo?.post?.user?.id)
-        console.log('userInfo', userInfo?.user?.id)
-        console.log("isOwner", isOwner)
-    }, [])
+    // const handleFollow = (e: React.MouseEvent) => {
+    //     e.stopPropagation();
+    //     setIsFollowing(!isFollowing);
+    // };
 
-    const handleFollow = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setIsFollowing(!isFollowing);
-    };
-
-    // Early return if postInfo or post is undefined
-    if (!postInfo || !postInfo.post) {
+    // Early return if post data is undefined
+    if (!post || !post.data) {
         return null;
     }
 
@@ -86,52 +69,23 @@ const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
         <article
             style={{
                 padding: '10px',
-                gap: 10
+                gap: 10,
+                border: showBorderLine ? '1px solid var(--border-color)' : 'none',
+                borderLeft: 0,
+                borderRight: 0,
+
             }}
-            className="border-b border-[var(--border-color)] flex cursor-pointer transition-colors hover:bg-[var(--surface-color)]/30 fade-in"
-        // onClick={() => onClick && onClick(post)}
+            className="flex cursor-pointer transition-colors hover:bg-[var(--surface-color)]/30 fade-in"
+            onClick={() => onClick && onClick(post.data)}
         >
-            <div className="flex-shrink-0 flex flex-col items-center">
-                <img
-                    src={`https://avatar.iran.liara.run/public?username=${postInfo.post.user?.username}`}
-                    alt={postInfo.post.user?.username}
-                    className="w-11 h-11 rounded-full object-cover bg-[var(--surface-light)] cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (postInfo.post.user?.id) {
-                            window.location.href = `/profile/${postInfo.post.user.id}`;
-                        }
-                    }}
-                />
+            <div className="flex-shrink-0 flex flex-col items-center pt-[5px]">
+                <img src={`https://avatar.iran.liara.run/public?username=${userInfo?.username}`} alt={userInfo.username} className="w-11 h-11 rounded-full object-cover bg-[var(--surface-light)]" />
             </div>
 
-            <div className="flex-grow min-w-0">
+            <div className="flex-grow min-w-0 pt-[5px]">
                 <div style={{ marginBottom: 5 }} className="flex justify-between items-start ">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                        <span
-                            className="font-semibold text-base text-[var(--text-main)] cursor-pointer hover:underline"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (postInfo.post.user?.id) {
-                                    window.location.href = `/profile/${postInfo.post.user.id}`;
-                                }
-                            }}
-                        >
-                            {postInfo.post.user?.username}
-                        </span>
-                        {!isOwner && <button
-                            onClick={handleFollow}
-                            style={{
-                                padding: '5px 10px',
-                                gap: 5
-                            }}
-                            className={`border rounded-lg  text-xs font-semibold transition-all hover:scale-105 active:scale-95 ${isFollowing
-                                ? 'border-[var(--border-color)] bg-transparent text-[var(--text-secondary)] hover:border-[var(--text-secondary)]'
-                                : 'border-[var(--text-main)] bg-[var(--text-main)] text-[var(--bg-color)] hover:bg-[var(--text-secondary)]'
-                                }`}
-                        >
-                            {isFollowing ? 'Following' : 'Follow'}
-                        </button>}
+                        <span className="font-semibold text-base text-[var(--text-main)]">{userInfo.username}</span>
                     </div>
                     <div className="flex gap-2 text-[var(--text-secondary)] text-sm items-center">
                         {/* <span>{post.timestamp}</span> */}
@@ -144,11 +98,11 @@ const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
                             </button>
                             {showMenu && (
                                 <div className="absolute top-full right-0 mt-1 bg-[var(--surface-color)] border border-[var(--border-color)] rounded-xl shadow-lg p-1.5 min-w-[160px] z-10 animate-fadeIn">
-                                    <button className="flex items-center gap-2.5 w-full py-2.5 px-3 text-left text-sm text-[var(--text-main)] rounded-lg hover:bg-[var(--surface-light)] transition-colors" onClick={() => { }}>
+                                    <button className="flex items-center gap-2.5 w-full py-2.5 px-3 text-left text-sm text-[var(--text-main)] rounded-lg hover:bg-[var(--surface-light)] transition-colors" onClick={handleShare}>
                                         <Share2 size={16} /> Share
                                     </button>
                                     {isOwner && (
-                                        <button className="flex items-center gap-2.5 w-full py-2.5 px-3 text-left text-sm text-[var(--accent-red)] rounded-lg hover:bg-[var(--surface-light)] transition-colors" onClick={() => deletePost({ post_id: postInfo.post.id })}>
+                                        <button className="flex items-center gap-2.5 w-full py-2.5 px-3 text-left text-sm text-[var(--accent-red)] rounded-lg hover:bg-[rgba(239,68,68,0.1)] transition-colors" onClick={handleDelete}>
                                             <Trash2 size={16} /> Delete
                                         </button>
                                     )}
@@ -158,14 +112,14 @@ const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
                     </div>
                 </div>
 
-                <div className="text-[0.95rem] leading-relaxed text-[var(--text-main)] whitespace-pre-wrap mb-3">{postInfo.post.content}</div>
+                <div className="text-[0.95rem] leading-relaxed text-[var(--text-main)] whitespace-pre-wrap mb-3">{post.data.content}</div>
 
-                {postInfo.post.image_url && (
-                    <img src={postInfo.post.image_url} style={{ marginBottom: 10, marginTop: 10 }} alt="Post content" className="w-full rounded-xl mt-2  border border-[var(--border-color)] max-h-[400px] object-cover" loading="lazy" />
+                {post.data.image_url && (
+                    <img src={post.data.image_url} style={{ marginBottom: 10, marginTop: 10 }} alt="Post content" className="w-full rounded-xl mt-2  border border-[var(--border-color)] max-h-[400px] object-cover" loading="lazy" />
                 )}
 
-                <div className="flex gap-6 mt-3">
-                    {/* <button
+                {/* <div className="flex gap-6 mt-3">
+                    <button
                         className={`flex items-center gap-2 transition-all p-2 rounded-full -ml-2 hover:bg-white/5 active:scale-90 ${liked ? 'text-[var(--accent-red)]' : 'text-[var(--text-secondary)] hover:text-[var(--accent-red)]'
                             }`}
                         onClick={handleLike}
@@ -173,11 +127,11 @@ const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
                     >
                         <Heart size={20} strokeWidth={liked ? 0 : 2} className={liked ? 'fill-[var(--accent-red)] animate-heartPop' : ''} />
                         {likesCount > 0 && <span className="text-sm font-medium">{likesCount}</span>}
-                    </button> */}
+                    </button>
 
                     <button className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary-color)] transition-all p-2 rounded-full -ml-2 hover:bg-white/5 active:scale-90" onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }} aria-label="Reply">
                         <MessageCircle size={20} />
-                        {postInfo.comments_count > 0 && <span className="text-sm font-medium">{postInfo.comments_count}</span>}
+                        {post.replies > 0 && <span className="text-sm font-medium">{post.replies}</span>}
                     </button>
 
                     <button className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--accent-green)] transition-all p-2 rounded-full -ml-2 hover:bg-white/5 active:scale-90" onClick={(e) => { e.stopPropagation(); }} aria-label="Repost">
@@ -187,7 +141,7 @@ const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
                     <button className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition-all p-2 rounded-full -ml-2 hover:bg-white/5 active:scale-90" onClick={(e) => { e.stopPropagation(); }} aria-label="Share">
                         <Send size={20} />
                     </button>
-                </div>
+                </div> */}
 
                 {showComments && (
                     <div className="mt-4 pt-4 border-t border-[var(--border-color)] animate-slideUp" onClick={(e) => e.stopPropagation()}>
@@ -214,4 +168,4 @@ const Post: React.FC<PostProps> = ({ postInfo, onDelete, onClick }) => {
     );
 };
 
-export default Post;
+export default UserPost;

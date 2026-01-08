@@ -156,3 +156,16 @@ textarea {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--border-color);
 }
+
+.hashtag {
+    color: #1d9bf0; /* twitter blue */
+    font-weight: 500;
+}
+
+textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+textarea {
+    caret-color: var(--text-main);
+}

@@ -19,6 +19,9 @@ apiClient.interceptors.request.use(
 
         if (accessToken && config.headers) {
             config.headers.Authorization = `Bearer ${accessToken}`;
+            console.log(`🔐 Request to ${config.url} with token:`, accessToken.substring(0, 20) + "...");
+        } else {
+            console.warn(`⚠️ Request to ${config.url} WITHOUT token`);
         }
 
         return config;
@@ -89,7 +92,13 @@ apiClient.interceptors.response.use(
                     { withCredentials: true }
                 );
 
-                const { accessToken: newAccessToken } = response.data;
+                console.log("Refresh token response:", response.data);
+                const newAccessToken = response.data.data?.accessToken || response.data.accessToken;
+
+                if (!newAccessToken) {
+                    console.error("No access token in refresh response:", response.data);
+                    throw new Error("No access token received from refresh endpoint");
+                }
 
                 // Update the access token in store
                 setAccessToken(newAccessToken);

@@ -25,8 +25,8 @@ const Signup: React.FC = () => {
         setLoading(true);
 
         try {
-            mutateAsync(formData);
-
+            await mutateAsync(formData);
+           
         } catch (error) {
             console.error(error);
         } finally {
@@ -68,8 +68,8 @@ const Signup: React.FC = () => {
                     required
                 />
 
-                <Button loading={loading} type="submit">
-                    Sign up
+                <Button disabled={loading} loading={loading} type="submit">
+                    {loading ? "..." : "Sign up"}
                 </Button>
             </form>
 

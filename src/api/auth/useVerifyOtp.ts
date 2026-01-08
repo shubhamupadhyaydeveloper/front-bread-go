@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../apiClient";
+import { toast } from "sonner";
 
 interface OtpCredentials {
     email: string;
@@ -19,10 +20,12 @@ export const useVerifyOtp = () => {
             return response.data;
         },
         onSuccess: (data) => {
+            toast.success("Otp verified successfully")
             navigate("/login");
         },
         onError: (error: any) => {
             console.error("Verify OTP failed:", error);
+            toast.error("Verify OTP failed")
         },
     });
 };
